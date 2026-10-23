@@ -4,9 +4,11 @@ Smart contracts for the ONETIME token launchpad.
 
 ## Overview
 
-- **LaunchToken.sol**: Standard ERC-20 token implementation
-- **SimpleTokenFactory.sol**: Factory contract that deploys tokens
-- **TokenLaunchFactory.sol**: (WIP) Advanced factory with Uniswap v4 integration
+- **LaunchToken.sol**: ✅ Standard ERC-20 token (production ready)
+- **SimpleTokenFactory.sol**: ✅ Factory that deploys tokens (production ready)
+- **V4TokenLauncher.sol**: 🚧 Pool init works, liquidity provision incomplete (see STATUS.md)
+
+**See [STATUS.md](./STATUS.md) for honest implementation status.**
 
 ## Deployed Addresses
 

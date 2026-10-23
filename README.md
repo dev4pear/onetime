@@ -4,12 +4,14 @@ Real token launchpad for Ethereum with Uniswap v4 roadmap.
 
 ## Features
 
-✅ **Real ERC-20 Token Deployment** - Deploy standard tokens on Ethereum  
-✅ **Wallet Integration** - Connect with MetaMask, Rainbow, WalletConnect  
-✅ **On-Chain Transactions** - All launches are real blockchain transactions  
-✅ **Etherscan Integration** - View tokens and transactions on block explorer  
-🚧 **Uniswap v4 Pools** - Automated pool creation (framework in place)  
+✅ **Real ERC-20 Token Deployment** - Deploy standard tokens on Ethereum (WORKS)  
+✅ **Wallet Integration** - Connect with MetaMask, Rainbow, WalletConnect (WORKS)  
+✅ **On-Chain Transactions** - All launches are real blockchain transactions (WORKS)  
+✅ **Etherscan Integration** - View tokens and transactions on block explorer (WORKS)  
+🚧 **Uniswap v4 Pools** - Pool initialization works, liquidity provision incomplete (see contracts/STATUS.md)  
 🚧 **Multichain** - Base, Robinhood, BSC, Solana (coming soon)
+
+**Honest status:** Token deployment is production-ready. Uniswap v4 automated liquidity needs 1-2 days more work.
 
 ## Quick Start
 
