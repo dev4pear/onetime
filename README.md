@@ -1,171 +1,227 @@
-# ONETIME
+# ONETIME - One Launch. Every Chain.
 
-**One launch. Every chain.**
+Real token launchpad for Ethereum with Uniswap v4 roadmap.
 
-ONETIME is a production-quality crypto token launchpad that enables creators to launch tokens once on Ethereum and expand to multiple chains with the same name and symbol. Inspired by the multichain future, built for the present.
+## Features
 
-## 🌟 Brand Vision
+✅ **Real ERC-20 Token Deployment** - Deploy standard tokens on Ethereum (WORKS)  
+✅ **Wallet Integration** - Connect with MetaMask, Rainbow, WalletConnect (WORKS)  
+✅ **On-Chain Transactions** - All launches are real blockchain transactions (WORKS)  
+✅ **Etherscan Integration** - View tokens and transactions on block explorer (WORKS)  
+🚧 **Uniswap v4 Pools** - Pool initialization works, liquidity provision incomplete (see contracts/STATUS.md)  
+🚧 **Multichain** - Base, Robinhood, BSC, Solana (coming soon)
 
-ONETIME solves the problem of fragmented token launches and copycat deployments. Launch your token once on Ethereum, reserve your name across all supported chains, and expand when you're ready. No split liquidity, no confusion, no copycats.
+**Honest status:** Token deployment is production-ready. Uniswap v4 automated liquidity needs 1-2 days more work.
 
-### Phase 1 (Current)
-- ✅ **Ethereum Only** - Live Uniswap v4-style launches on Ethereum mainnet
-- ✅ Name reservation across all supported chains
-- ✅ Unified liquidity architecture
+## Quick Start
 
-### Phase 2 (Coming Soon)
-- ⏳ **Base** - Coinbase's Layer 2
-- ⏳ **Robinhood Chain** - Robinhood's blockchain
-- ⏳ **BSC** - Binance Smart Chain  
-- ⏳ **Solana** - High-performance blockchain
-
-## 🎨 Design
-
-- **Dark Mode First** - Premium, high-contrast crypto-native UI
-- **Brand Colors** - Electric violet (#8b5cf6) + ethereal cyan (#06b6d4)
-- **Motion** - Subtle CSS animations and transitions
-- **Glass Effects** - Glowing accents and gradient borders
-- **Responsive** - Desktop and mobile optimized
-
-## 📁 Site Structure
-
-### `/` - Landing Page
-Cinematic hero section with ONETIME branding, chain nodes visualization (Ethereum lit, others coming soon), problem/solution narrative, and clear CTAs.
-
-### `/launch` - Token Creation
-Full-featured form to create tokens with:
-- Token details (name, symbol, description)
-- Optional image upload (UI only)
-- Social links (website, X, Telegram)
-- Chain selector (Ethereum enabled, others locked)
-- Fee estimate and launch flow
-- Success state with mock transaction details
-
-### `/explore` - Token Discovery
-Grid of example tokens with:
-- Mock data showcasing different token types
-- ETH live badge on all tokens
-- Filter chips (Ethereum enabled, others disabled)
-- Market cap and holder counts
-- Hover effects and polish
-
-### `/docs` - Documentation
-Comprehensive markdown-style docs covering:
-- How ONETIME works (Phase 1 & 2)
-- Technical architecture (Uniswap v4 + LayerZero OFT)
-- Fee structure and breakdown
-- Roadmap with quarterly milestones
-- FAQ section
-
-## 🛠️ Tech Stack
-
-- **Next.js 15** - App Router with TypeScript
-- **Tailwind CSS v4** - Utility-first styling with custom theme
-- **Geist Font** - Modern sans-serif typography
-- **React 19** - Latest React features
-- **No external dependencies** - Pure Next.js + Tailwind
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
+### Development
 
 ```bash
 # Install dependencies
 npm install
 
+# Configure environment
+cp .env.example .env.local
+# Edit .env.local with your settings (see below)
+
 # Run development server
 npm run dev
+```
 
-# Build for production
+Open [http://localhost:3000](http://localhost:3000)
+
+### Environment Setup
+
+Create `.env.local`:
+
+```env
+# Network (1 = Ethereum Mainnet, 11155111 = Sepolia Testnet)
+NEXT_PUBLIC_CHAIN_ID=11155111
+NEXT_PUBLIC_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
+
+# Deployed factory contract address
+NEXT_PUBLIC_FACTORY_ADDRESS=0x...
+
+# WalletConnect Project ID (get from https://cloud.walletconnect.com)
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
+```
+
+## Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment guide covering:
+- Smart contract deployment to Sepolia/Mainnet
+- Frontend configuration
+- Environment variables
+- Verification steps
+
+### Quick Deploy to Sepolia
+
+```bash
+# Deploy contracts
+cd contracts
+forge script script/DeployFactory.s.sol:DeployFactory \
+  --rpc-url $SEPOLIA_RPC_URL \
+  --broadcast \
+  --verify
+
+# Configure frontend with deployed address
+cd ..
+echo "NEXT_PUBLIC_FACTORY_ADDRESS=0x..." >> .env.local
+
+# Test
+npm run dev
+```
+
+## Architecture
+
+### Smart Contracts (`/contracts`)
+
+- **LaunchToken.sol**: ✅ Standard ERC-20 with configurable decimals (production ready)
+- **SimpleTokenFactory.sol**: ✅ Factory for deploying tokens (production ready, active)
+- **V4TokenLauncher.sol**: 🚧 Pool init works, liquidity incomplete (see contracts/STATUS.md)
+
+Built with:
+- Foundry
+- OpenZeppelin Contracts  
+- Uniswap v4 Core + Periphery (integrated for pool init)
+
+**See contracts/STATUS.md for detailed implementation status.**
+
+### Frontend (`/app`)
+
+- Next.js 16 (App Router)
+- Tailwind CSS 4
+- Wagmi + Viem (Ethereum interactions)
+- RainbowKit (wallet connection)
+
+## How It Works
+
+1. **User connects wallet** via RainbowKit (MetaMask, Rainbow, WalletConnect, etc.)
+2. **Fill token details**: name, symbol, supply, decimals
+3. **Pay launch fee**: Small ETH fee (e.g., 0.001 ETH on testnet)
+4. **Sign transaction**: Wallet prompts for approval
+5. **Token deployed**: Factory deploys ERC-20, mints supply to user
+6. **View on explorer**: Get contract address and Etherscan link
+
+## Development
+
+### Project Structure
+
+```
+/workspace
+├── app/                    # Next.js frontend
+│   ├── config/            # Wagmi, contracts config
+│   ├── providers/         # Web3 providers
+│   ├── components/        # React components
+│   ├── launch/           # Token launch page
+│   └── ...
+├── contracts/             # Smart contracts
+│   ├── src/              # Solidity contracts
+│   ├── script/           # Deployment scripts
+│   ├── test/             # Contract tests
+│   └── foundry.toml
+├── .env.example          # Frontend env template
+└── DEPLOYMENT.md         # Deployment guide
+```
+
+### Build & Test
+
+```bash
+# Frontend
 npm run build
+npm run lint
 
-# Start production server
-npm start
+# Smart contracts
+cd contracts
+forge build
+forge test
+forge test --gas-report
 ```
 
-The app will be available at `http://localhost:3000` (or your configured port).
+## Uniswap v4 Integration
 
-## 📦 Project Structure
+**Status**: Framework in place, awaiting v4 mainnet launch
 
-```
-/app
-  /components
-    Navigation.tsx      # Global navigation bar
-    Footer.tsx          # Site footer
-    ChainBadge.tsx      # Chain status badges & selector
-  /launch
-    page.tsx           # Token creation form
-  /explore  
-    page.tsx           # Token discovery grid
-  /docs
-    page.tsx           # Documentation
-  page.tsx             # Landing page
-  layout.tsx           # Root layout
-  globals.css          # Global styles & theme
-  icon.svg             # ONETIME favicon
-```
+Current `TokenLaunchFactory.sol` includes:
+- PoolManager interfaces
+- Pool key generation
+- Currency ordering (ETH/WETH pairs)
+- Sqrt price calculations
 
-## 🎯 Features
+**To complete**:
+1. Uniswap v4 goes live on mainnet
+2. Integrate PositionManager for liquidity
+3. Handle pool initialization
+4. Add liquidity provision flow
+5. Test on live v4 contracts
 
-### ✅ Implemented
-- Cinematic landing page with animated gradients
-- Full token creation flow (UI complete, no wallet required for v1)
-- Chain selector with live/coming soon states
-- Mock token discovery grid with filtering
-- Comprehensive documentation
-- Responsive navigation and footer
-- Custom brand theme and components
-- Connect Wallet placeholder for future integration
-- Success toasts and loading states
+See `contracts/README.md` for details.
 
-### 🔜 Future Enhancements
-- Wallet connection (MetaMask, WalletConnect)
-- Real smart contract deployment
-- On-chain transaction signing
-- LayerZero cross-chain bridging
-- Live token data from subgraphs
-- User profiles and token management
-- Advanced analytics dashboard
+## Roadmap
 
-## 🎨 Design Philosophy
+- [x] ERC-20 token deployment
+- [x] Wallet integration (RainbowKit)
+- [x] Ethereum mainnet/testnet support
+- [x] Transaction tracking & explorer links
+- [x] Launch fee mechanism
+- [ ] Uniswap v4 pool creation
+- [ ] Initial liquidity provision
+- [ ] Base network support
+- [ ] Robinhood network support
+- [ ] BSC network support
+- [ ] Solana network support
+- [ ] Token registry & discovery
+- [ ] Advanced tokenomics (vesting, etc.)
 
-ONETIME's visual identity is built around:
-- **Unity** - One brand, one interface, many chains
-- **Clarity** - Clear distinction between live and coming soon features  
-- **Premium** - High-quality, polished UI that inspires confidence
-- **Motion** - Subtle animations that guide attention without distraction
-- **Accessibility** - Clear focus states and semantic HTML
+## Configuration
 
-## 🌈 Color Palette
+### Supported Networks
 
-```css
-Primary Gradient: violet (#8b5cf6) → cyan (#06b6d4)
-Background: Pure black (#000000)
-Foreground: White (#ffffff)
-Borders: White/10 opacity
-Glass Effects: White/5 opacity
-Success: Green (#22c55e)
-Warning: Yellow (#eab308)
-```
+| Network | Chain ID | Status |
+|---------|----------|--------|
+| Ethereum Mainnet | 1 | ✅ Active |
+| Sepolia Testnet | 11155111 | ✅ Active |
+| Base | 8453 | 🚧 Coming Soon |
+| Robinhood | TBD | 🚧 Coming Soon |
+| BSC | 56 | 🚧 Coming Soon |
+| Solana | N/A | 🚧 Coming Soon |
 
-## 📝 License
+### Launch Fees
 
-This is a demonstration project. Feel free to use as inspiration for your own projects.
+- **Testnet (Sepolia)**: 0.001 ETH
+- **Mainnet**: 0.01 ETH (recommended)
 
-## 🤝 Contributing
+Configurable in factory deployment.
 
-This is a showcase project. For production use, add:
-- Real wallet integration
-- Smart contract audits
-- Proper error handling
-- Rate limiting
-- Security best practices
-- Environment variable management
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test on Sepolia
+5. Submit a pull request
+
+## Security
+
+- Standard ERC-20 (OpenZeppelin)
+- No admin minting
+- Launch fee prevents spam
+- Supply minted to creator
+- Open source & verifiable
+
+**Production**: Consider professional audit before significant usage.
+
+## License
+
+MIT
+
+## Support
+
+- [Documentation](./DEPLOYMENT.md)
+- [Smart Contracts](./contracts/README.md)
+- [Issues](https://github.com/dev4pear/onetime/issues)
 
 ---
 
-Built with ⚡ by the ONETIME team
+Built for the decentralized future. One launch. Every chain.

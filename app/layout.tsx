@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
+import { Web3Provider } from "./providers/Web3Provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,9 +32,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-black text-white">
-        <Navigation />
-        <main className="flex-1 pt-16">{children}</main>
-        <Footer />
+        <Web3Provider>
+          <Navigation />
+          <main className="flex-1 pt-16">{children}</main>
+          <Footer />
+        </Web3Provider>
       </body>
     </html>
   );

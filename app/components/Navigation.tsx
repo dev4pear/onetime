@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -30,9 +31,9 @@ export default function Navigation() {
           </div>
           
           <div className="flex items-center space-x-3">
-            <button className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors">
-              Connect Wallet
-            </button>
+            <div className="[&_button]:!rounded-lg [&_button]:!text-sm [&_button]:!px-4 [&_button]:!py-2">
+              <ConnectButton />
+            </div>
             <Link 
               href="/launch"
               className="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-lg font-medium text-sm hover:shadow-lg hover:shadow-violet-500/50 transition-all"
