@@ -12,9 +12,12 @@ import {Currency} from "v4-core/types/Currency.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/types/PoolId.sol";
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {StateLibrary} from "v4-core/libraries/StateLibrary.sol";
 
 contract RealV4LauncherTest is Test {
     using PoolIdLibrary for PoolKey;
+    using StateLibrary for IPoolManager;
 
     RealV4Launcher public launcher;
     IPoolManager public poolManager;
@@ -25,24 +28,13 @@ contract RealV4LauncherTest is Test {
     
     uint256 constant LAUNCH_FEE = 0.001 ether;
     
-    // Sepolia v4 addresses
-    address constant SEPOLIA_POOL_MANAGER = 0x8C4BcBE6b9eF47855f97E675296FA3F6fafa5F1A;
-    address constant SEPOLIA_POSITION_MANAGER = address(0); // TODO: get real address
+    // Official Uniswap v4 addresses (from developers.uniswap.org)
+    address constant SEPOLIA_POOL_MANAGER = 0xE03A1074c86CFeDd5C142C4F04F1a1536e203543;
+    address constant SEPOLIA_POSITION_MANAGER = 0x429ba70129df741B2Ca2a85BC3A2a3328e5c09b4;
 
     function setUp() public {
-        // Fork Sepolia if POSITION_MANAGER is deployed, otherwise skip
-        if (SEPOLIA_POSITION_MANAGER == address(0)) {
-            // For now, we'll document that v4 PositionManager address is needed
-            console.log("Skipping test: SEPOLIA_POSITION_MANAGER not set");
-            console.log("Update SEPOLIA_POSITION_MANAGER in test file once deployed");
-            return;
-        }
-        
         string memory sepoliaRpc = vm.envOr("SEPOLIA_RPC_URL", string(""));
-        if (bytes(sepoliaRpc).length == 0) {
-            console.log("Skipping test: SEPOLIA_RPC_URL not set");
-            return;
-        }
+        require(bytes(sepoliaRpc).length > 0, "SEPOLIA_RPC_URL not set - test cannot run");
         
         vm.createSelectFork(sepoliaRpc);
         
@@ -61,11 +53,6 @@ contract RealV4LauncherTest is Test {
     }
 
     function test_launchToken() public {
-        if (address(positionManager) == address(0)) {
-            console.log("Skipping: PositionManager not configured");
-            return;
-        }
-        
         vm.startPrank(creator);
         
         uint256 treasuryBalanceBefore = treasury.balance;
@@ -111,19 +98,23 @@ contract RealV4LauncherTest is Test {
         // Verify pool was created (poolId is not zero)
         assertTrue(PoolId.unwrap(result.poolId) != bytes32(0), "Pool not created");
         
-        // Verify position NFT was minted to creator (PositionManager is ERC721)
-        // address nftOwner = IERC721(address(positionManager)).ownerOf(result.positionTokenId);
-        // assertEq(nftOwner, creator, "NFT not owned by creator");
-        // Note: Skipping NFT ownership check for now, would need IERC721 import
+        // Verify pool is initialized (sqrtPriceX96 != 0)
+        (uint160 poolSqrtPriceX96,,,) = poolManager.getSlot0(result.poolId);
+        assertTrue(poolSqrtPriceX96 > 0, "Pool not initialized");
+        
+        // Verify position NFT was minted to creator
+        assertEq(IERC721(address(positionManager)).ownerOf(result.positionTokenId), creator, "NFT not owned by creator");
         
         // Verify creator received remaining tokens
-        uint256 creatorBalance = token.balanceOf(creator);
-        uint256 expectedRemaining = (totalSupply - tokenAmountForLP) * 10**decimals;
-        assertEq(creatorBalance, expectedRemaining, "Creator didn't receive remaining tokens");
+        assertEq(
+            token.balanceOf(creator),
+            (totalSupply - tokenAmountForLP) * 10**decimals,
+            "Wrong token balance"
+        );
         
         console.log("Token deployed:", result.token);
-        console.log("Pool ID:", uint256(PoolId.unwrap(result.poolId)));
-        console.log("Position NFT ID:", result.positionTokenId);
+        console.log("Pool sqrtPrice:", poolSqrtPriceX96);
+        console.log("Position NFT:", result.positionTokenId);
     }
     
     function test_currencyOrdering() public {

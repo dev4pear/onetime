@@ -9,6 +9,8 @@ import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPositionManager} from "v4-periphery/interfaces/IPositionManager.sol";
 import {Actions} from "v4-periphery/libraries/Actions.sol";
+import {LiquidityAmounts} from "v4-periphery/libraries/LiquidityAmounts.sol";
+import {TickMath} from "v4-core/libraries/TickMath.sol";
 import "./LaunchToken.sol";
 
 /// @title RealV4Launcher
@@ -106,10 +108,20 @@ contract RealV4Launcher {
         // 3. Initialize pool
         poolManager.initialize(key, sqrtPriceX96);
 
-        // 4. Prepare liquidity params
+        // 4. Calculate liquidity from desired amounts
         uint256 tokenLiquidityWei = tokenAmountForLP * (10 ** decimals);
         
-        // Approve PositionManager
+        // Calculate actual liquidity value using LiquidityAmounts
+        // For NATIVE (currency0) + TOKEN (currency1) pair
+        uint128 liquidity = LiquidityAmounts.getLiquidityForAmounts(
+            sqrtPriceX96,
+            TickMath.getSqrtPriceAtTick(tickLower),
+            TickMath.getSqrtPriceAtTick(tickUpper),
+            ethForLiquidity,  // amount0 (ETH)
+            tokenLiquidityWei // amount1 (token)
+        );
+        
+        // Approve PositionManager for tokens
         IERC20(address(token)).approve(address(positionManager), tokenLiquidityWei);
 
         // 5. Build action plan using Planner pattern
@@ -121,7 +133,7 @@ contract RealV4Launcher {
             key,              // PoolKey
             tickLower,        // int24
             tickUpper,        // int24
-            tokenLiquidityWei, // uint256 liquidity (approximate)
+            uint256(liquidity), // uint256 liquidity (calculated from amounts)
             MAX_SLIPPAGE,     // uint128 amount0Max
             MAX_SLIPPAGE,     // uint128 amount1Max
             msg.sender,       // address recipient (creator gets the NFT)

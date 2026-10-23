@@ -12,11 +12,9 @@ contract DeployV4Launcher is Script {
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         uint256 launchFee = vm.envUint("LAUNCH_FEE");
         
-        // Sepolia v4 addresses
-        address poolManager = 0x8C4BcBE6b9eF47855f97E675296FA3F6fafa5F1A;
-        address positionManager = vm.envOr("POSITION_MANAGER", address(0));
-        
-        require(positionManager != address(0), "Set POSITION_MANAGER in .env");
+        // Official Uniswap v4 addresses (from developers.uniswap.org)
+        address poolManager = 0xE03A1074c86CFeDd5C142C4F04F1a1536e203543; // Sepolia
+        address positionManager = 0x429ba70129df741B2Ca2a85BC3A2a3328e5c09b4; // Sepolia
 
         vm.startBroadcast(deployerPrivateKey);
 
