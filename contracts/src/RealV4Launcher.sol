@@ -13,6 +13,11 @@ import {LiquidityAmounts} from "v4-periphery/libraries/LiquidityAmounts.sol";
 import {TickMath} from "v4-core/libraries/TickMath.sol";
 import "./LaunchToken.sol";
 
+/// @notice Minimal Permit2 interface for allowance transfers
+interface IAllowanceTransfer {
+    function approve(address token, address spender, uint160 amount, uint48 expiration) external;
+}
+
 /// @title RealV4Launcher
 /// @notice Deploys ERC-20 + initializes Uniswap v4 pool + seeds real liquidity
 contract RealV4Launcher {
@@ -20,6 +25,7 @@ contract RealV4Launcher {
 
     IPoolManager public immutable poolManager;
     IPositionManager public immutable positionManager;
+    IAllowanceTransfer public constant permit2 = IAllowanceTransfer(0x000000000022D473030F116dDEE9F6B43aC78BA3);
     
     Currency public constant NATIVE = Currency.wrap(address(0));
     uint24 public constant DEFAULT_FEE = 3000;
@@ -121,8 +127,11 @@ contract RealV4Launcher {
             tokenLiquidityWei // amount1 (token)
         );
         
-        // Approve PositionManager for tokens
-        IERC20(address(token)).approve(address(positionManager), tokenLiquidityWei);
+        // Two-step approval: PositionManager uses Permit2
+        // 1. Approve Permit2 to spend tokens
+        IERC20(address(token)).approve(address(permit2), type(uint256).max);
+        // 2. Approve PositionManager as a spender on Permit2
+        permit2.approve(address(token), address(positionManager), type(uint160).max, type(uint48).max);
 
         // 5. Build action plan using Planner pattern
         bytes memory actions;

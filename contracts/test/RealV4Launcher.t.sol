@@ -49,7 +49,7 @@ contract RealV4LauncherTest is Test {
         );
         
         // Give creator some ETH
-        vm.deal(creator, 10 ether);
+        vm.deal(creator, 100 ether);
     }
 
     function test_launchToken() public {
@@ -62,12 +62,12 @@ contract RealV4LauncherTest is Test {
         string memory symbol = "TEST";
         uint256 totalSupply = 1000000; // 1M tokens
         uint8 decimals = 18;
-        uint256 tokenAmountForLP = 500000; // 500K for LP
+        uint256 tokenAmountForLP = 10; // 10 tokens for LP (proportional to ETH at 1:1)
         uint160 sqrtPriceX96 = 79228162514264337593543950336; // 1:1 price
-        int24 tickLower = -60; // One tick below
-        int24 tickUpper = 60;  // One tick above
+        int24 tickLower = -887220; // Full range for tick spacing 60
+        int24 tickUpper = 887220;  // Full range for tick spacing 60
         
-        uint256 ethForLiquidity = 1 ether;
+        uint256 ethForLiquidity = 10 ether; // 10 ETH to match 10 tokens at 1:1
         uint256 totalValue = LAUNCH_FEE + ethForLiquidity;
         
         // Execute launch
