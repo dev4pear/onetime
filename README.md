@@ -77,14 +77,16 @@ npm run dev
 
 ### Smart Contracts (`/contracts`)
 
-- **LaunchToken.sol**: Standard ERC-20 with configurable decimals
-- **SimpleTokenFactory.sol**: Factory for deploying tokens (active)
-- **TokenLaunchFactory.sol**: Extended factory with Uniswap v4 hooks (in progress)
+- **LaunchToken.sol**: ✅ Standard ERC-20 with configurable decimals (production ready)
+- **SimpleTokenFactory.sol**: ✅ Factory for deploying tokens (production ready, active)
+- **V4TokenLauncher.sol**: 🚧 Pool init works, liquidity incomplete (see contracts/STATUS.md)
 
 Built with:
 - Foundry
-- OpenZeppelin Contracts
-- Uniswap v4 Core (dependency)
+- OpenZeppelin Contracts  
+- Uniswap v4 Core + Periphery (integrated for pool init)
+
+**See contracts/STATUS.md for detailed implementation status.**
 
 ### Frontend (`/app`)
 
